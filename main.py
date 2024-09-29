@@ -13,16 +13,37 @@ async def hello_world():
     return {"message": "Hello World"}
 
 
-@app.get("/art_type")
+@app.post("/art_type")
 async def get_art_type(id: int):
     session = Session()
     art_type = session.query(Art_type).filter(Art_type.id == id).first()
-    return {"Art Type": art_type.Name}
+    return art_type
 
 
-@app.get("/activity")
+@app.post("/activity")
 async def get_activity_by_artType(artType_id: int):
     session = Session()
     activity = session.query(Activity).filter(
         Activity.art_type_id == artType_id).all()
-    return {"Activity": activity}
+    return activity
+
+
+@app.post("/all_activities")
+async def get_all_activities():
+    session = Session()
+    activities = session.query(
+        Activity, Art_type).filter(Activity.art_type_id == Art_type.id).all()
+    return [{
+        "id": activity.id,
+        "name": activity.Name,
+        "TimeDescription": activity.TimeDescription,
+        "Location": activity.Location,
+        "WorkHours": activity.WorkHours,
+        "WorkForce": activity.WorkForce,
+        "WorkForceBalance": activity.WorkForceBalance,
+        "Description": activity.Description,
+        "art_type": {
+            "id": art_type.id,
+            "name": art_type.Name
+        }
+    } for activity, art_type in activities]
